@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Otomasyon Paneli</title>
+<meta name="robots" content="noindex, nofollow">
+<style>
+  :root {
+    --bg: #0f1012; --panel: #17181b; --panel2: #1e2024; --line: #2a2c31;
+    --text: #ecebe8; --muted: #9a9890; --accent: #f2a03d; --accent-ink: #1a1206;
+    --ok: #5fc28a; --bad: #ef6b5b; --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 80px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: .02em; }
+  h1 span { color: var(--accent); }
+  h2 { font-size: 16px; margin: 0 0 14px; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
+  nav { display: flex; gap: 6px; margin-bottom: 16px; overflow-x: auto; }
+  nav button { background: transparent; border: 1px solid var(--line); color: var(--muted); padding: 8px 14px; border-radius: 999px; cursor: pointer; white-space: nowrap; font: inherit; }
+  nav button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  input, select, textarea { width: 100%; background: var(--panel2); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 9px 11px; font: inherit; }
+  textarea { resize: vertical; min-height: 80px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+  .btn { background: var(--panel2); color: var(--text); border: 1px solid var(--line); padding: 9px 16px; border-radius: 8px; cursor: pointer; font: inherit; font-weight: 600; }
+  .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .stat { background: var(--panel2); border-radius: 10px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 22px; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: var(--panel2); border: 1px solid var(--line); border-radius: 999px; padding: 4px 6px 4px 12px; display: flex; align-items: center; gap: 6px; }
+  .chip input { width: 118px; padding: 3px 6px; background: transparent; border: none; }
+  .chip button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; }
+  .switch { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .switch .track { width: 46px; height: 26px; border-radius: 999px; background: var(--line); position: relative; transition: .2s; }
+  .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text); transition: .2s; }
+  .switch.on .track { background: var(--ok); }
+  .switch.on .track::after { left: 23px; }
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .item { display: flex; gap: 12px; align-items: flex-start; background: var(--panel2); border-radius: 10px; padding: 10px 12px; }
+  .item .t { flex: 1; min-width: 0; }
+  .item .meta { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: var(--line); color: var(--muted); white-space: nowrap; }
+  .badge.ok { background: rgba(95,194,138,.15); color: var(--ok); }
+  .badge.bad { background: rgba(239,107,91,.15); color: var(--bad); }
+  .badge.run { background: rgba(242,160,61,.15); color: var(--accent); }
+  .icon-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 2px 4px; }
+  .icon-btn:hover { color: var(--bad); }
+  a { color: var(--accent); }
+  .hidden { display: none !important; }
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; opacity: 0; transition: .25s; pointer-events: none; max-width: calc(100% - 32px); }
+  #toast.show { opacity: 1; }
+  #toast.err { background: var(--bad); color: #fff; }
+  .hint { background: var(--panel2); border-left: 3px solid var(--accent); padding: 10px 12px; border-radius: 6px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>OTOMASYON <span>●</span> Motivasyon Shorts</h1>
+      <div class="sub" id="repoLabel">Bağlı değil</div>
+    </div>
+    <div class="row hidden" id="topActions">
+      <button class="btn" id="btnDisconnect" title="Bu tarayıcıdaki anahtarı sil">Çıkış</button>
+      <button class="btn" id="btnTest">Deneme videosu üret</button>
+      <button class="btn primary" id="btnNow">Şimdi üret ve yükle</button>
+    </div>
+  </header>
+
+  <!-- BAĞLANTI -->
+  <section class="card" id="connectCard">
+    <h2>GitHub bağlantısı</h2>
+    <div class="grid">
+      <div><label>GitHub kullanıcı adı</label><input id="cOwner" placeholder="ornek-kullanici"></div>
+      <div><label>Depo (repo) adı</label><input id="cRepo" placeholder="shorts-otomasyon"></div>
+      <div><label>Erişim anahtarı (fine-grained token)</label><input id="cToken" type="password" placeholder="github_pat_..."></div>
+    </div>
+    <p class="hint">Anahtar sadece bu tarayıcıda saklanır. Token'a yalnızca bu depo için <b>Contents: Read and write</b> ve <b>Actions: Read and write</b> izni ver.</p>
+    <div class="row"><button class="btn primary" id="btnConnect">Bağlan</button></div>
+  </section>
+
+  <div id="app" class="hidden">
+    <nav>
+      <button data-tab="ozet" class="on">Özet</button>
+      <button data-tab="ayarlar">Ayarlar</button>
+      <button data-tab="metinler">Metin havuzu</button>
+      <button data-tab="gecmis">Geçmiş</button>
+    </nav>
+
+    <!-- ÖZET -->
+    <section data-pane="ozet">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <h2 style="margin:0">Durum</h2>
+          <div class="switch" id="swActive"><span id="swLabel">Açık</span><div class="track"></div></div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="stats">
+          <div class="stat"><b id="sNext">–</b><span>Sıradaki video</span></div>
+          <div class="stat"><b id="sDaily">–</b><span>Günlük video</span></div>
+          <div class="stat"><b id="sTexts">–</b><span>Kullanılmamış metin</span></div>
+          <div class="stat"><b id="sTotal">–</b><span>Toplam yayınlanan</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h2 style="margin:0">Son çalışmalar</h2>
+          <a id="actionsLink" target="_blank" rel="noopener">GitHub'da aç ↗</a>
+        </div>
+        <div class="list" id="runs"><div class="sub">Yükleniyor…</div></div>
+        <p class="sub" style="margin-top:12px">Saatlik kontroller birkaç saniyede biter. Video üreten çalışmalar 2-4 dakika sürer. Deneme videolarını GitHub'daki çalışma sayfasının altından "Artifacts" bölümünden indirebilirsin.</p>
+      </div>
+    </section>
+
+    <!-- AYARLAR -->
+    <section data-pane="ayarlar" class="hidden">
+      <div class="card">
+        <h2>Yayın saatleri</h2>
+        <div class="grid">
+          <div><label>Günde kaç video?</label><input id="fCount" type="number" min="1" max="12"></div>
+          <div><label>İlk videonun saati</label><input id="fFirst" type="time"></div>
+          <div style="align-self:end"><button class="btn" id="btnSpread">Saatleri eşit dağıt</button></div>
+        </div>
+        <div style="height:14px"></div>
+        <label>Yayın saatleri (Türkiye saati) — elle de düzenleyebilirsin</label>
+        <div class="chips" id="times"></div>
+        <div style="height:8px"></div>
+        <button class="btn" id="btnAddTime">+ Saat ekle</button>
+      </div>
+
+      <div class="card">
+        <h2>Video</h2>
+        <div class="grid">
+          <div><label>Video süresi (saniye)</label><input id="fDur" type="number" min="10" max="59"></div>
+          <div><label>Yazı tipi</label>
+            <select id="fFace"><option value="Lora.ttf">Lora — zarif</option><option value="Lora-Italic.ttf">Lora İtalik — zarif, eğik</option><option value="Poppins-Medium.ttf">Poppins — modern</option><option value="Poppins-Light.ttf">Poppins Light — modern, ince</option></select>
+          </div>
+          <div><label>Yazı boyutu (önerilen 48-60)</label><input id="fFont" type="number" min="36" max="110"></div>
+          <div><label>Satır başına karakter</label><input id="fWrap" type="number" min="12" max="40"></div>
+          <div><label>Arka plan karartma (0 - 0.8)</label><input id="fDark" type="number" step="0.05" min="0" max="0.8"></div>
+          <div><label>Müzik sesi (0 - 1.5)</label><input id="fVol" type="number" step="0.05" min="0" max="1.5"></div>
+          <div><label>Alt imza (kanal adı, boş bırakılabilir)</label><input id="fSign" placeholder="@kanaladi"></div>
+          <div><label>Sözün altında ince çizgi</label><select id="fLine"><option value="1">Göster</option><option value="0">Gizle</option></select></div>
+        </div>
+        <div style="height:14px"></div>
+        <div class="grid"><div><label>Video kaynağı</label>
+          <select id="fSource"><option value="otomatik">Otomatik (önce Pixabay, sonra Pexels)</option><option value="pixabay">Sadece Pixabay</option><option value="pexels">Sadece Pexels</option></select>
+        </div></div>
+        <div style="height:14px"></div>
+        <label>Video arama kelimeleri (İngilizce, her satıra bir tane)</label>
+        <textarea id="fQueries" rows="5"></textarea>
+      </div>
+
+      <div class="card">
+        <h2>YouTube</h2>
+        <div class="grid">
+          <div><label>Gizlilik</label>
+            <select id="fPrivacy"><option value="public">Herkese açık</option><option value="unlisted">Liste dışı</option><option value="private">Gizli</option></select>
+          </div>
+          <div><label>Başlık sonu eki</label><input id="fSuffix"></div>
+        </div>
+        <div style="height:14px"></div>
+        <label>Açıklama (sözün altına eklenir)</label>
+        <textarea id="fDesc" rows="4"></textarea>
+        <div style="height:14px"></div>
+        <label>Etiketler (virgülle ayır)</label>
+        <input id="fTags">
+      </div>
+      <button class="btn primary" id="btnSaveCfg">Ayarları kaydet</button>
+    </section>
+
+    <!-- METİNLER -->
+    <section data-pane="metinler" class="hidden">
+      <div class="card">
+        <h2>Yeni metin ekle</h2>
+        <label>Her satır ayrı bir söz olarak eklenir</label>
+        <textarea id="newTexts" rows="5" placeholder="Bugün başla, yarın teşekkür edeceksin.&#10;Vazgeçmek kolay, devam etmek değerli."></textarea>
+        <div style="height:10px"></div>
+        <div class="grid">
+          <div><label>Video araması (isteğe bağlı, örn. "ocean")</label><input id="newQuery"></div>
+          <div style="align-self:end"><button class="btn primary" id="btnAddTexts">Havuza ekle ve kaydet</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h2 style="margin:0">Havuz <span class="sub" id="poolCount"></span></h2>
+          <input id="search" placeholder="Ara…" style="max-width:220px">
+        </div>
+        <div class="list" id="textList"></div>
+      </div>
+    </section>
+
+    <!-- GEÇMİŞ -->
+    <section data-pane="gecmis" class="hidden">
+      <div class="card">
+        <h2>Yayınlanan videolar</h2>
+        <div class="list" id="history"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const S = { owner: '', repo: '', token: '', branch: 'main', config: null, cfgSha: null, texts: [], textSha: null, state: null };
+
+/* ---------- yardımcılar ---------- */
+const store = {
+  get(k) { try { return localStorage.getItem(k) || ''; } catch { return ''; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+function toast(msg, err) {
+  const t = $('toast'); t.textContent = msg; t.className = 'show' + (err ? ' err' : '');
+  clearTimeout(toast._t); toast._t = setTimeout(() => (t.className = ''), err ? 6000 : 2500);
+}
+function b64encode(str) {
+  const bytes = new TextEncoder().encode(str); let bin = '';
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+function b64decode(b64) {
+  const bin = atob(b64.replace(/\n/g, '')); const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+const escapeHtml = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+async function gh(path, opts = {}) {
+  const res = await fetch(`https://api.github.com/repos/${S.owner}/${S.repo}${path}`, {
+    ...opts,
+    headers: { Authorization: `Bearer ${S.token}`, Accept: 'application/vnd.github+json', ...(opts.body ? { 'Content-Type': 'application/json' } : {}) },
+  });
+  if (res.status === 204) return null;
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`${res.status}: ${j.message || 'GitHub hatası'}`);
+  return j;
+}
+async function getFile(path) {
+  const j = await gh(`/contents/${path}?ref=${S.branch}&t=${Date.now()}`);
+  return { data: JSON.parse(b64decode(j.content)), sha: j.sha };
+}
+async function putFile(path, data, sha, message) {
+  const j = await gh(`/contents/${path}`, {
+    method: 'PUT',
+    body: JSON.stringify({ message, branch: S.branch, sha, content: b64encode(JSON.stringify(data, null, 2) + '\n') }),
+  });
+  return j.content.sha;
+}
+
+/* ---------- bağlantı ---------- */
+async function connect() {
+  S.owner = $('cOwner').value.trim(); S.repo = $('cRepo').value.trim(); S.token = $('cToken').value.trim();
+  if (!S.owner || !S.repo || !S.token) return toast('Üç alanı da doldur', true);
+  try {
+    const repo = await gh('');
+    S.branch = repo.default_branch;
+    store.set('ot_owner', S.owner); store.set('ot_repo', S.repo); store.set('ot_token', S.token);
+    $('repoLabel').textContent = `${S.owner}/${S.repo}`;
+    $('actionsLink').href = `https://github.com/${S.owner}/${S.repo}/actions`;
+    $('connectCard').classList.add('hidden'); $('app').classList.remove('hidden'); $('topActions').classList.remove('hidden');
+    await loadAll();
+  } catch (e) { toast('Bağlanılamadı — ' + e.message, true); }
+}
+function disconnect() {
+  ['ot_owner', 'ot_repo', 'ot_token'].forEach(store.del);
+  location.reload();
+}
+
+async function loadAll() {
+  const [c, t, s] = await Promise.all([getFile('data/config.json'), getFile('data/texts.json'), getFile('data/state.json')]);
+  S.config = c.data; S.cfgSha = c.sha; S.texts = t.data; S.textSha = t.sha; S.state = s.data;
+  fillSettings(); renderOverview(); renderTexts(); renderHistory(); loadRuns();
+}
+
+/* ---------- özet ---------- */
+function nextSlot() {
+  const times = (S.config.saatler || []).slice().sort();
+  if (!times.length) return '–';
+  const now = new Date(new Date().toLocaleString('en-US', { timeZone: S.config.saatDilimi || 'Europe/Istanbul' }));
+  const hm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  return times.find((t) => t > hm) || times[0];
+}
+function renderOverview() {
+  const used = new Set(S.state.kullanilanMetinler || []);
+  $('sNext').textContent = S.config.aktif ? nextSlot() : 'Durduruldu';
+  $('sDaily').textContent = (S.config.saatler || []).length;
+  $('sTexts').textContent = S.texts.filter((t) => !used.has(t.id)).length;
+  $('sTotal').textContent = (S.state.gecmis || []).filter((g) => g.youtubeId).length;
+  $('swActive').classList.toggle('on', !!S.config.aktif);
+  $('swLabel').textContent = S.config.aktif ? 'Otomasyon açık' : 'Otomasyon kapalı';
+}
+async function toggleActive() {
+  S.config.aktif = !S.config.aktif;
+  try { await saveConfig(S.config.aktif ? 'Otomasyon açıldı' : 'Otomasyon durduruldu'); }
+  catch (e) { S.config.aktif = !S.config.aktif; renderOverview(); }
+}
+async function loadRuns() {
+  try {
+    const j = await gh('/actions/workflows/otomasyon.yml/runs?per_page=8');
+    const runs = j.workflow_runs || [];
+    $('runs').innerHTML = runs.length ? runs.map((r) => {
+      const st = r.status !== 'completed' ? ['run', 'Çalışıyor'] : r.conclusion === 'success' ? ['ok', 'Başarılı'] : ['bad', 'Hata'];
+      const kind = r.event === 'schedule' ? 'Saatlik kontrol' : 'Manuel';
+      return `<div class="item"><div class="t"><a href="${r.html_url}" target="_blank" rel="noopener">${kind} #${r.run_number}</a>
+        <div class="meta">${new Date(r.created_at).toLocaleString('tr-TR')}</div></div><span class="badge ${st[0]}">${st[1]}</span></div>`;
+    }).join('') : '<div class="sub">Henüz çalışma yok.</div>';
+  } catch (e) { $('runs').innerHTML = `<div class="sub">Çalışmalar okunamadı: ${escapeHtml(e.message)}</div>`; }
+}
+async function dispatch(test) {
+  const b = test ? $('btnTest') : $('btnNow'); b.disabled = true;
+  try {
+    await gh('/actions/workflows/otomasyon.yml/dispatches', {
+      method: 'POST', body: JSON.stringify({ ref: S.branch, inputs: { zorla: 'true', deneme: test ? 'true' : 'false' } }),
+    });
+    toast(test ? 'Deneme başladı, 2-4 dk içinde hazır' : 'Üretim başladı, birkaç dakika içinde YouTube’da');
+    setTimeout(loadRuns, 4000);
+  } catch (e) { toast('Başlatılamadı — ' + e.message, true); }
+  b.disabled = false;
+}
+
+/* ---------- ayarlar ---------- */
+function renderTimes(times) {
+  $('times').innerHTML = times.map((t, i) =>
+    `<span class="chip"><input type="time" value="${t}" data-i="${i}"><button data-del="${i}" title="Sil">×</button></span>`).join('');
+}
+const readTimes = () => [...$('times').querySelectorAll('input')].map((i) => i.value).filter(Boolean);
+function spread() {
+  const n = Math.max(1, Math.min(12, Number($('fCount').value) || 1));
+  const [h, m] = ($('fFirst').value || '09:00').split(':').map(Number);
+  const step = 1440 / n, start = h * 60 + m;
+  renderTimes(Array.from({ length: n }, (_, i) => {
+    const t = Math.round(start + i * step) % 1440;
+    return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+  }));
+}
+function fillSettings() {
+  const c = S.config, g = c.gorunum || {}, y = c.youtube || {};
+  renderTimes(c.saatler || []);
+  $('fCount').value = (c.saatler || []).length || 3; $('fFirst').value = (c.saatler || [])[0] || '09:00';
+  $('fDur').value = c.videoSuresi ?? 27; $('fFont').value = g.yaziBoyutu ?? 54; $('fWrap').value = g.satirUzunlugu ?? 26;
+  $('fFace').value = g.yaziTipi || 'Lora.ttf'; $('fLine').value = g.cizgi === false ? '0' : '1';
+  $('fDark').value = g.karartma ?? 0.28; $('fVol').value = c.muzikSesi ?? 0.8; $('fSign').value = g.imza || '';
+  $('fQueries').value = (c.aramalar || c.pexelsAramalari || []).join('\n'); $('fSource').value = c.videoKaynagi || 'otomatik';
+  $('fPrivacy').value = y.gizlilik || 'public'; $('fSuffix').value = y.baslikEki || ''; $('fDesc').value = y.aciklama || '';
+  $('fTags').value = (y.etiketler || []).join(', ');
+}
+async function saveConfig(message) {
+  try {
+    // Başkası değiştirdiyse güncel sha'yı al
+    const fresh = await getFile('data/config.json'); S.cfgSha = fresh.sha;
+    S.cfgSha = await putFile('data/config.json', S.config, S.cfgSha, message);
+    renderOverview(); toast('Kaydedildi');
+  } catch (e) { toast('Kaydedilemedi — ' + e.message, true); throw e; }
+}
+async function saveSettings() {
+  const times = [...new Set(readTimes())].sort();
+  if (!times.length) return toast('En az bir yayın saati ekle', true);
+  const c = S.config;
+  c.saatler = times;
+  c.videoSuresi = Math.max(10, Math.min(59, Number($('fDur').value) || 27));
+  c.muzikSesi = Number($('fVol').value);
+  c.gorunum = { ...(c.gorunum || {}), yaziTipi: $('fFace').value, cizgi: $('fLine').value === '1', yaziBoyutu: Number($('fFont').value), satirUzunlugu: Number($('fWrap').value), karartma: Number($('fDark').value), imza: $('fSign').value.trim() };
+  c.aramalar = $('fQueries').value.split('\n').map((s) => s.trim()).filter(Boolean); delete c.pexelsAramalari; c.videoKaynagi = $('fSource').value;
+  c.youtube = { ...(c.youtube || {}), gizlilik: $('fPrivacy').value, baslikEki: $('fSuffix').value.trim(), aciklama: $('fDesc').value,
+    etiketler: $('fTags').value.split(',').map((s) => s.trim()).filter(Boolean) };
+  $('btnSaveCfg').disabled = true;
+  try { await saveConfig('Ayarlar panelden güncellendi'); renderTimes(times); } catch {}
+  $('btnSaveCfg').disabled = false;
+}
+
+/* ---------- metinler ---------- */
+function renderTexts() {
+  const used = new Set(S.state.kullanilanMetinler || []);
+  const q = $('search').value.toLocaleLowerCase('tr');
+  const list = S.texts.filter((t) => !q || t.metin.toLocaleLowerCase('tr').includes(q)).slice().reverse();
+  $('poolCount').textContent = `(${S.texts.length} söz, ${S.texts.filter((t) => !used.has(t.id)).length} kullanılmamış)`;
+  $('textList').innerHTML = list.map((t) => `<div class="item"><div class="t">${escapeHtml(t.metin)}
+    <div class="meta">#${t.id}${t.arama ? ' · Arama: ' + escapeHtml(t.arama) : ''}</div></div>
+    ${used.has(t.id) ? '<span class="badge ok">Kullanıldı</span>' : '<span class="badge">Sırada</span>'}
+    <button class="icon-btn" data-delt="${t.id}" title="Sil">×</button></div>`).join('') || '<div class="sub">Metin yok.</div>';
+}
+async function saveTexts(message) {
+  const fresh = await getFile('data/texts.json'); S.textSha = fresh.sha;
+  S.textSha = await putFile('data/texts.json', S.texts, S.textSha, message);
+}
+async function addTexts() {
+  const lines = $('newTexts').value.split('\n').map((s) => s.trim()).filter(Boolean);
+  if (!lines.length) return toast('Önce söz yaz', true);
+  const query = $('newQuery').value.trim();
+  let id = S.texts.reduce((m, t) => Math.max(m, t.id), 0);
+  const added = lines.map((metin) => ({ id: ++id, metin, arama: query }));
+  S.texts.push(...added);
+  try {
+    await saveTexts(`${added.length} yeni metin eklendi`);
+    $('newTexts').value = ''; $('newQuery').value = ''; renderTexts(); renderOverview(); toast(`${added.length} söz eklendi`);
+  } catch (e) { S.texts.splice(-added.length); toast('Kaydedilemedi — ' + e.message, true); }
+}
+async function deleteText(id) {
+  const t = S.texts.find((x) => x.id === id);
+  if (!t || !confirm(`Silinsin mi?\n\n"${t.metin}"`)) return;
+  const before = S.texts; S.texts = S.texts.filter((x) => x.id !== id);
+  try { await saveTexts(`Metin #${id} silindi`); renderTexts(); renderOverview(); toast('Silindi'); }
+  catch (e) { S.texts = before; toast('Silinemedi — ' + e.message, true); }
+}
+
+/* ---------- geçmiş ---------- */
+function renderHistory() {
+  const h = (S.state.gecmis || []).slice().reverse();
+  $('history').innerHTML = h.map((g) => `<div class="item"><div class="t">${escapeHtml(g.metin)}
+    <div class="meta">${new Date(g.tarih).toLocaleString('tr-TR')} · ${g.slot === 'manuel' ? 'Manuel' : 'Plan: ' + escapeHtml(g.slot)}${g.muzik ? ' · ' + escapeHtml(g.muzik) : ''}</div></div>
+    ${g.youtubeId ? `<a class="badge ok" href="https://youtube.com/shorts/${encodeURIComponent(g.youtubeId)}" target="_blank" rel="noopener">İzle ↗</a>` : '<span class="badge">Yüklenmedi</span>'}</div>`).join('')
+    || '<div class="sub">Henüz video yayınlanmadı.</div>';
+}
+
+/* ---------- olaylar ---------- */
+document.querySelectorAll('nav button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('[data-pane]').forEach((p) => p.classList.toggle('hidden', p.dataset.pane !== b.dataset.tab));
+  if (b.dataset.tab === 'ozet') loadRuns();
+}));
+$('btnConnect').onclick = connect;
+$('btnDisconnect').onclick = disconnect;
+$('btnNow').onclick = () => confirm('Şimdi bir video üretilip YouTube’a yüklensin mi?') && dispatch(false);
+$('btnTest').onclick = () => dispatch(true);
+$('swActive').onclick = toggleActive;
+$('btnSpread').onclick = spread;
+$('btnAddTime').onclick = () => renderTimes([...readTimes(), '12:00']);
+$('times').onclick = (e) => { const i = e.target.dataset.del; if (i !== undefined) { const t = readTimes(); t.splice(Number(i), 1); renderTimes(t); } };
+$('btnSaveCfg').onclick = saveSettings;
+$('btnAddTexts').onclick = addTexts;
+$('search').oninput = renderTexts;
+$('textList').onclick = (e) => { const id = e.target.dataset.delt; if (id) deleteText(Number(id)); };
+
+// kayıtlı bağlantı varsa otomatik bağlan
+$('cOwner').value = store.get('ot_owner') || 'yasin58aydinn-hub'; $('cRepo').value = store.get('ot_repo') || 'shorts-otomasyon'; $('cToken').value = store.get('ot_token');
+if (store.get('ot_token')) connect();
+</script>
+</body>
+</html>
