@@ -60,6 +60,15 @@
   #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-weight: 600; opacity: 0; transition: .25s; pointer-events: none; max-width: calc(100% - 32px); }
   #toast.show { opacity: 1; }
   #toast.err { background: var(--bad); color: #fff; }
+  .preview { display: grid; grid-template-columns: minmax(0, 270px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 640px) { .preview { grid-template-columns: minmax(0, 1fr); } }
+  .frame { aspect-ratio: 9 / 16; max-width: 100%; background: var(--panel2); border-radius: 10px; overflow: hidden; display: grid; place-items: center; text-align: center; padding: 0; }
+  .frame .sub { padding: 16px; }
+  .frame img, .frame video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .pvinfo { display: grid; gap: 10px; min-width: 0; }
+  .pvinfo .quote { font-size: 17px; line-height: 1.5; }
+  .kv { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 4px 12px; font-size: 13px; }
+  .kv dt { color: var(--muted); } .kv dd { margin: 0; overflow-wrap: anywhere; }
   .hint { background: var(--panel2); border-left: 3px solid var(--accent); padding: 10px 12px; border-radius: 6px; color: var(--muted); font-size: 13px; }
 </style>
 </head>
@@ -110,6 +119,16 @@
           <div class="stat"><b id="sDaily">–</b><span>Günlük video</span></div>
           <div class="stat"><b id="sTexts">–</b><span>Kullanılmamış metin</span></div>
           <div class="stat"><b id="sTotal">–</b><span>Toplam yayınlanan</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <h2 style="margin:0">Son üretilen video</h2>
+          <button class="btn" id="btnPreview">Yenile</button>
+        </div>
+        <div class="preview">
+          <div class="frame" id="pvFrame"><div class="sub">Henüz önizleme yok. "Deneme videosu üret" ile bir tane oluştur.</div></div>
+          <div class="pvinfo" id="pvInfo"></div>
         </div>
       </div>
       <div class="card">
@@ -281,7 +300,7 @@ function disconnect() {
 async function loadAll() {
   const [c, t, s] = await Promise.all([getFile('data/config.json'), getFile('data/texts.json'), getFile('data/state.json')]);
   S.config = c.data; S.cfgSha = c.sha; S.texts = t.data; S.textSha = t.sha; S.state = s.data;
-  fillSettings(); renderOverview(); renderTexts(); renderHistory(); loadRuns();
+  fillSettings(); renderOverview(); renderTexts(); renderHistory(); loadRuns(); loadPreview();
 }
 
 /* ---------- özet ---------- */
@@ -317,6 +336,38 @@ async function loadRuns() {
         <div class="meta">${new Date(r.created_at).toLocaleString('tr-TR')}</div></div><span class="badge ${st[0]}">${st[1]}</span></div>`;
     }).join('') : '<div class="sub">Henüz çalışma yok.</div>';
   } catch (e) { $('runs').innerHTML = `<div class="sub">Çalışmalar okunamadı: ${escapeHtml(e.message)}</div>`; }
+}
+let pvUrl = null;
+async function getRaw(path) {
+  const res = await fetch(`https://api.github.com/repos/${S.owner}/${S.repo}/contents/${path}?ref=${S.branch}&t=${Date.now()}`, {
+    headers: { Authorization: `Bearer ${S.token}`, Accept: 'application/vnd.github.raw' },
+  });
+  if (!res.ok) return null;
+  return res.blob();
+}
+async function loadPreview() {
+  try {
+    const infoBlob = await getRaw('data/son-video.json');
+    if (!infoBlob) return;
+    const d = JSON.parse(await infoBlob.text());
+    const k = d.kaynak || {}, c = d.cikti || {};
+    const fmt = (iso) => new Date(iso).toLocaleString('tr-TR');
+    $('pvInfo').innerHTML = `<div class="quote">${escapeHtml(d.metin)}</div>
+      <dl class="kv">
+        <dt>Üretildi</dt><dd>${fmt(d.tarih)} ${d.deneme ? '<span class="badge run">Deneme</span>' : '<span class="badge ok">Yayın</span>'}</dd>
+        <dt>Arka plan</dt><dd>${escapeHtml(k.cozunurluk || '')} · ${k.sureSn || '?'} sn · ${escapeHtml(k.arama || '')}${k.sayfa ? ` · <a href="${encodeURI(k.sayfa)}" target="_blank" rel="noopener">${escapeHtml(k.sahibi || 'kaynak')} ↗</a>` : ''}</dd>
+        <dt>Çıktı</dt><dd>${escapeHtml(c.cozunurluk || '')} · ${c.sureSn || '?'} sn · ${c.boyutMB || '?'} MB</dd>
+        <dt>Müzik</dt><dd>${escapeHtml(d.muzik || 'yok')}${d.muzikBaslangicSn ? ` (${d.muzikBaslangicSn}. sn'den)` : ''}</dd>
+      </dl>`;
+    const vid = d.deneme ? await getRaw('data/onizleme.mp4') : null;
+    const media = vid || await getRaw('data/onizleme.jpg');
+    if (!media) return;
+    if (pvUrl) URL.revokeObjectURL(pvUrl);
+    pvUrl = URL.createObjectURL(media);
+    $('pvFrame').innerHTML = vid
+      ? `<video src="${pvUrl}" controls playsinline preload="metadata"></video>`
+      : `<img src="${pvUrl}" alt="Son videodan bir kare">`;
+  } catch (e) { /* önizleme isteğe bağlı */ }
 }
 async function dispatch(test) {
   const b = test ? $('btnTest') : $('btnNow'); b.disabled = true;
@@ -434,6 +485,7 @@ $('btnConnect').onclick = connect;
 $('btnDisconnect').onclick = disconnect;
 $('btnNow').onclick = () => confirm('Şimdi bir video üretilip YouTube’a yüklensin mi?') && dispatch(false);
 $('btnTest').onclick = () => dispatch(true);
+$('btnPreview').onclick = () => { loadRuns(); loadPreview(); };
 $('swActive').onclick = toggleActive;
 $('btnSpread').onclick = spread;
 $('btnAddTime').onclick = () => renderTimes([...readTimes(), '12:00']);
