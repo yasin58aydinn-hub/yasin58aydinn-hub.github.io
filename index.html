@@ -5,51 +5,78 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shorts Paneli</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#eef2f0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111715" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#15172b">
+<script>
+  // Temayı sayfa çizilmeden uygula (yanıp sönme olmasın)
+  (function () {
+    var t = 'alacakaranlik';
+    try { t = localStorage.getItem('ot_tema') || t; } catch (e) {}
+    document.documentElement.setAttribute('data-palette', t);
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap">
 <style>
-  /* Sakin bir kontrol odası: tek sütun, sola hizalı; sözler videodaki Lora ile, arayüz Figtree ile */
+  /* Tek sütunlu, sakin bir kontrol odası. Sözler videodaki Lora ile, arayüz Figtree ile.
+     Dört palet: her biri kendi içinde tam bir görünüm (açık ya da koyu), sağ üstten seçilir. */
   :root {
-    --bg: #eef2f0;          /* sabah sisi */
-    --surface: #ffffff;
-    --surface-2: #f5f8f6;
-    --line: #dbe3df;
-    --text: #1c2826;        /* koyu çam */
-    --muted: #64736f;
-    --accent: #2f6b5a;      /* çam yeşili */
-    --accent-soft: #e1eee9;
-    --accent-ink: #ffffff;
-    --dawn: #c9772f;        /* gün doğumu: sıradaki slot */
-    --dawn-soft: #f8ecdf;
-    --danger: #b4443a;
-    --danger-soft: #f7e3e1;
-    --shadow: 0 1px 2px rgba(28, 40, 38, .06), 0 8px 24px rgba(28, 40, 38, .06);
+    /* Alacakaranlık (varsayılan): gece mavisi zemin, gün batımı şeftalisi vurgu */
+    --bg: #15172b; --surface: #1d2038; --surface-2: #262a45; --line: #343959;
+    --text: #eeebf6; --muted: #9c9fbd;
+    --accent: #f4a77a; --accent-soft: #3a2f3f; --accent-ink: #21172a;
+    --dawn: #f5c96a; --dawn-soft: #39342a;
+    --danger: #ff8f87; --danger-soft: #3e2433;
+    --glow: radial-gradient(1100px 420px at 50% -120px, rgba(244, 167, 122, .16), transparent 70%),
+            radial-gradient(700px 300px at 85% -80px, rgba(150, 120, 230, .14), transparent 70%);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 10px 30px rgba(5, 6, 20, .35);
+    color-scheme: dark;
     --ui: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     --quote: "Lora", Georgia, "Times New Roman", serif;
     --r-lg: 18px; --r-md: 12px; --r-sm: 8px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #111715; --surface: #18201e; --surface-2: #1e2826; --line: #2a3633;
-      --text: #e4ebe8; --muted: #93a39e; --accent: #7cc4a8; --accent-soft: #1f3530; --accent-ink: #0f1a17;
-      --dawn: #e9a463; --dawn-soft: #3a2b1d; --danger: #ef8a7f; --danger-soft: #3a2220;
-      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark;
-    }
+  :root[data-palette="okyanus"] {
+    --bg: #0d1c22; --surface: #13262e; --surface-2: #19303a; --line: #25444f;
+    --text: #e2f1f4; --muted: #8eadb5;
+    --accent: #5fd0c3; --accent-soft: #173a3c; --accent-ink: #062120;
+    --dawn: #ffb86b; --dawn-soft: #392e20;
+    --danger: #ff8a80; --danger-soft: #3b2226;
+    --glow: radial-gradient(1000px 400px at 30% -120px, rgba(95, 208, 195, .13), transparent 70%);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 10, 14, .35);
+    color-scheme: dark;
   }
-  :root[data-theme="dark"] {
-    --bg: #111715; --surface: #18201e; --surface-2: #1e2826; --line: #2a3633;
-    --text: #e4ebe8; --muted: #93a39e; --accent: #7cc4a8; --accent-soft: #1f3530; --accent-ink: #0f1a17;
-    --dawn: #e9a463; --dawn-soft: #3a2b1d; --danger: #ef8a7f; --danger-soft: #3a2220;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25); color-scheme: dark;
+  :root[data-palette="lavanta"] {
+    --bg: #f2f0fa; --surface: #ffffff; --surface-2: #f7f5fd; --line: #e2def2;
+    --text: #25213b; --muted: #6c6786;
+    --accent: #5a4ac2; --accent-soft: #e9e5fb; --accent-ink: #ffffff;
+    --dawn: #cf762d; --dawn-soft: #fbeee0;
+    --danger: #c0433a; --danger-soft: #fae4e2;
+    --glow: radial-gradient(1000px 380px at 50% -140px, rgba(90, 74, 194, .10), transparent 70%);
+    --shadow: 0 1px 2px rgba(37, 33, 59, .06), 0 8px 24px rgba(37, 33, 59, .07);
+    color-scheme: light;
   }
+  :root[data-palette="orman"] {
+    --bg: #eef2f0; --surface: #ffffff; --surface-2: #f5f8f6; --line: #dbe3df;
+    --text: #1c2826; --muted: #64736f;
+    --accent: #2f6b5a; --accent-soft: #e1eee9; --accent-ink: #ffffff;
+    --dawn: #c9772f; --dawn-soft: #f8ecdf;
+    --danger: #b4443a; --danger-soft: #f7e3e1;
+    --glow: none;
+    --shadow: 0 1px 2px rgba(28, 40, 38, .06), 0 8px 24px rgba(28, 40, 38, .06);
+    color-scheme: light;
+  }
+
+  /* Tema seçici */
+  .palettes { display: flex; gap: 6px; align-items: center; }
+  .swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; padding: 0; cursor: pointer;
+    background: linear-gradient(135deg, var(--sw-a) 0 50%, var(--sw-b) 50% 100%); box-shadow: 0 0 0 1px var(--line); }
+  .swatch[aria-pressed="true"] { border-color: var(--text); box-shadow: none; }
+  .top-right { display: flex; align-items: center; gap: 10px; }
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0; background: var(--bg); color: var(--text);
+    margin: 0; background: var(--glow), var(--bg); background-repeat: no-repeat; background-attachment: fixed; color: var(--text);
     font: 15px/1.55 var(--ui); font-feature-settings: "tnum" 0;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -99,9 +126,9 @@
   .status-text .big { font-size: 22px; font-weight: 700; }
   .switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; border: 0; background: none; font: 600 14px var(--ui); color: var(--muted); padding: 4px; }
   .switch .track { width: 44px; height: 26px; border-radius: 99px; background: var(--line); position: relative; transition: background .2s; }
-  .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
+  .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .2s; }
   .switch[aria-checked="true"] .track { background: var(--accent); }
-  .switch[aria-checked="true"] .track::after { transform: translateX(18px); }
+  .switch[aria-checked="true"] .track::after { transform: translateX(18px); background: var(--accent-ink); }
 
   .day { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
   .day-label { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
@@ -205,7 +232,15 @@
       </span>
       Shorts Paneli
     </div>
-    <button class="icon-btn" id="btnLogout" hidden title="Bu tarayıcıdan çıkış yap">Çıkış</button>
+    <div class="top-right">
+      <div class="palettes" role="group" aria-label="Tema">
+        <button class="swatch" data-palette="alacakaranlik" style="--sw-a:#15172b;--sw-b:#f4a77a" title="Alacakaranlık" aria-label="Alacakaranlık teması"></button>
+        <button class="swatch" data-palette="okyanus" style="--sw-a:#0d1c22;--sw-b:#5fd0c3" title="Okyanus" aria-label="Okyanus teması"></button>
+        <button class="swatch" data-palette="lavanta" style="--sw-a:#f2f0fa;--sw-b:#5a4ac2" title="Lavanta" aria-label="Lavanta teması"></button>
+        <button class="swatch" data-palette="orman" style="--sw-a:#eef2f0;--sw-b:#2f6b5a" title="Orman" aria-label="Orman teması"></button>
+      </div>
+      <button class="icon-btn" id="btnLogout" hidden title="Bu tarayıcıdan çıkış yap">Çıkış</button>
+    </div>
   </header>
 
   <!-- GİRİŞ -->
@@ -697,6 +732,17 @@ $('btnAddTexts').onclick = addTexts;
 $('search').oninput = renderTexts;
 $('textList').addEventListener('click', (e) => { const btn = e.target.closest('[data-delt]'); if (btn) deleteText(Number(btn.dataset.delt), btn); });
 window.addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// Tema seçimi
+const THEME_BG = { alacakaranlik: '#15172b', okyanus: '#0d1c22', lavanta: '#f2f0fa', orman: '#eef2f0' };
+function applyTheme(name) {
+  if (!THEME_BG[name]) name = 'alacakaranlik';
+  document.documentElement.setAttribute('data-palette', name);
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', THEME_BG[name]);
+  document.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.palette === name)));
+}
+document.querySelectorAll('.swatch').forEach((b) => b.addEventListener('click', () => { applyTheme(b.dataset.palette); store.set('ot_tema', b.dataset.palette); }));
+applyTheme(document.documentElement.getAttribute('data-palette'));
 
 // Kayıtlı bağlantı varsa otomatik bağlan
 $('cOwner').value = store.get('ot_owner') || DEFAULT_OWNER;
